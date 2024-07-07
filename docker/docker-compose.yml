@@ -1,0 +1,35 @@
+x-sharedconfig: &sharedconfig
+  depends_on:
+    rabbit:
+      condition: service_healthy
+  environment:
+    - MassTransitConfig__Username=guest
+    - MassTransitConfig__Password=guest
+    - MassTransitConfig__Uri=rabbit
+
+
+services:
+  api:
+    image: ${DOCKER_REGISTRY-}api
+    build:
+      context: ..
+      dockerfile: Api/Dockerfile
+    <<: *sharedconfig
+
+  handler:
+    image: ${DOCKER_REGISTRY-}handler
+    build:
+      context: ..
+      dockerfile: Handler/Dockerfile
+    <<: *sharedconfig
+
+  rabbit:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 30s
+      retries: 5
