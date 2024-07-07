@@ -11,7 +11,7 @@ builder.Logging.AddJsonConsole();
 
 var appSettings = builder.Configuration.Get<AppSettings>();
 
-builder.Services.ConfigureOpenTelemetry("handler", "1.0");
+builder.ConfigureOpenTelemetry("handler", "1.0");
 
 builder.Services.ConfigureMassTransit(appSettings!.MassTransitConfig, (busRegistrationConfigurator) =>
 {

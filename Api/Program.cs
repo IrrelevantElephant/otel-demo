@@ -14,7 +14,7 @@ builder.Logging.AddJsonConsole();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.ConfigureOpenTelemetry("api", "1.0", traceConfig =>
+builder.ConfigureOpenTelemetry("api", "1.0", traceConfig =>
 {
     traceConfig.AddAspNetCoreInstrumentation();
 });

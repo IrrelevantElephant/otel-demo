@@ -1,6 +1,9 @@
 ﻿using MassTransit;
 using MassTransit.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using OpenTelemetry.Logs;
 using OpenTelemetry.ResourceDetectors.Container;
 using OpenTelemetry.ResourceDetectors.Host;
 using OpenTelemetry.Resources;
@@ -37,7 +40,7 @@ public static class IServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection ConfigureOpenTelemetry(this IServiceCollection services, string serviceName, string serviceVersion, Action<TracerProviderBuilder> additionalTraceConfiguration)
+    public static IHostApplicationBuilder ConfigureOpenTelemetry(this IHostApplicationBuilder hostApplicationBuilder, string serviceName, string serviceVersion, Action<TracerProviderBuilder> additionalTraceConfiguration)
     {
         Action<ResourceBuilder> appResourceBuilder =
             resource => resource
@@ -45,7 +48,7 @@ public static class IServiceCollectionExtensions
                 .AddDetector(new ContainerResourceDetector())
                 .AddDetector(new HostDetector());
 
-        services.AddOpenTelemetry()
+        hostApplicationBuilder.Services.AddOpenTelemetry()
             .ConfigureResource(appResourceBuilder)
             .WithTracing(tracerBuilder =>
             {
@@ -54,12 +57,14 @@ public static class IServiceCollectionExtensions
                 tracerBuilder.AddOtlpExporter();
             });
 
-        return services;
+        hostApplicationBuilder.Logging.AddOpenTelemetry(options => options.AddOtlpExporter());
+
+        return hostApplicationBuilder;
     }
 
-    public static IServiceCollection ConfigureOpenTelemetry(this IServiceCollection services, string serviceName, string serviceVersion)
+    public static IHostApplicationBuilder ConfigureOpenTelemetry(this IHostApplicationBuilder hostApplicationBuilder, string serviceName, string serviceVersion)
     {
-        ConfigureOpenTelemetry(services, serviceName, serviceVersion, (additionalTraceConfiguration) => { });
-        return services;
+        ConfigureOpenTelemetry(hostApplicationBuilder, serviceName, serviceVersion, (additionalTraceConfiguration) => { });
+        return hostApplicationBuilder;
     }
 }

@@ -8,7 +8,6 @@ x-sharedconfig: &sharedconfig
     - MassTransitConfig__Uri=rabbit
     - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4317
 
-
 services:
   api:
     image: ${DOCKER_REGISTRY-}api
@@ -36,7 +35,7 @@ services:
       retries: 5
 
   otelcol:
-    image: otel/opentelemetry-collector-contrib:0.93.0
+    image: otel/opentelemetry-collector-contrib:0.102.0
     container_name: otel-col
     command: [ "--config=/etc/otelcol-config.yml" ]
     volumes:
@@ -56,6 +55,12 @@ services:
       - ../tempo/tempo.yaml:/etc/tempo.yaml
     command: [ "-config.file=/etc/tempo.yaml" ]
 
+  loki:
+    image: grafana/loki:3.0.0
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+
   grafana:
     image: grafana/grafana:latest
     environment:
@@ -69,4 +74,6 @@ services:
       - "3000:3000"
     depends_on:
       tempo:
+        condition: service_started
+      loki:
         condition: service_started
