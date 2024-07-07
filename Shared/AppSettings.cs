@@ -2,5 +2,5 @@
 
 public class AppSettings
 {
-    public MassTransitConfig MassTransitConfig { get; set; }
+    public required MassTransitConfig MassTransitConfig { get; set; }
 }

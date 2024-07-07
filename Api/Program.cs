@@ -1,20 +1,25 @@
 using MassTransit;
 using Messages;
+using OpenTelemetry.Trace;
 using Shared;
+using System.Diagnostics;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var appSettings = new AppSettings();
-
-builder.Configuration.Bind(appSettings);
+var appSettings = builder.Configuration.Get<AppSettings>();
 
 builder.Logging.AddJsonConsole();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.ConfigureMassTransit(appSettings.MassTransitConfig);
+builder.Services.ConfigureOpenTelemetry("api", "1.0", traceConfig =>
+{
+    traceConfig.AddAspNetCoreInstrumentation();
+});
+
+builder.Services.ConfigureMassTransit(appSettings!.MassTransitConfig);
 
 var app = builder.Build();
 

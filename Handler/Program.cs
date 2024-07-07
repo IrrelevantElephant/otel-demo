@@ -9,11 +9,11 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.Logging.AddJsonConsole();
 
-var appSettings = new AppSettings();
+var appSettings = builder.Configuration.Get<AppSettings>();
 
-builder.Configuration.Bind(appSettings);
+builder.Services.ConfigureOpenTelemetry("handler", "1.0");
 
-builder.Services.ConfigureMassTransit(appSettings.MassTransitConfig, (busRegistrationConfigurator) =>
+builder.Services.ConfigureMassTransit(appSettings!.MassTransitConfig, (busRegistrationConfigurator) =>
 {
     busRegistrationConfigurator.RegisterConsumer<HelloMessageConsumer>();
 });

@@ -2,7 +2,8 @@
 
 public class MassTransitConfig
 {
-    public string Username { get; set; }
-    public string Password { get; set; }
-    public string Uri { get; set; }
+    public required string Username { get; set; }
+    public required string Password { get; set; }
+    public required string Uri { get; set; }
+    public string VirtualHost { get; set; } = "/";
 }
