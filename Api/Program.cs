@@ -1,8 +1,6 @@
 using MassTransit;
 using Messages;
-using OpenTelemetry.Trace;
 using Shared;
-using System.Diagnostics;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,10 +12,7 @@ builder.Logging.AddJsonConsole();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.ConfigureOpenTelemetry("api", "1.0", traceConfig =>
-{
-    traceConfig.AddAspNetCoreInstrumentation();
-});
+builder.ConfigureOpenTelemetry("api", "1.0");
 
 builder.Services.ConfigureMassTransit(appSettings!.MassTransitConfig);
 

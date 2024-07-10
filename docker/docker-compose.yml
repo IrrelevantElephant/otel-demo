@@ -2,6 +2,8 @@ x-sharedconfig: &sharedconfig
   depends_on:
     rabbit:
       condition: service_healthy
+    grafana:
+      condition: service_healthy
   environment:
     - MassTransitConfig__Username=guest
     - MassTransitConfig__Password=guest
@@ -43,9 +45,8 @@ services:
     ports:
       - "4317:4317"
       - "4318:4318"
-    depends_on:
-      grafana:
-        condition: service_started
+      - "9000:9000"
+      - "8888:8888"
 
   tempo:
     image: grafana/tempo:latest
@@ -61,6 +62,13 @@ services:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
 
+  prometheus:
+    image: prom/prometheus
+    volumes:
+     - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+     - "9090:9090"
+
   grafana:
     image: grafana/grafana:latest
     environment:
@@ -72,8 +80,16 @@ services:
       - ../grafana/grafana.ini:/etc/grafana/grafana.ini
     ports:
       - "3000:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f localhost:3000/api/health && echo 'ready'"]
+      interval: 10s
+      retries: 30
     depends_on:
       tempo:
         condition: service_started
       loki:
+        condition: service_started
+      prometheus:
+        condition: service_started
+      otelcol:
         condition: service_started

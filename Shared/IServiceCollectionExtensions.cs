@@ -1,9 +1,11 @@
 ﻿using MassTransit;
 using MassTransit.Logging;
+using MassTransit.Monitoring;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.ResourceDetectors.Container;
 using OpenTelemetry.ResourceDetectors.Host;
 using OpenTelemetry.Resources;
@@ -53,8 +55,15 @@ public static class IServiceCollectionExtensions
             .WithTracing(tracerBuilder =>
             {
                 additionalTraceConfiguration(tracerBuilder);
+                tracerBuilder.AddAspNetCoreInstrumentation();
                 tracerBuilder.AddSource(DiagnosticHeaders.DefaultListenerName);
                 tracerBuilder.AddOtlpExporter();
+            })
+            .WithMetrics(metricsBuilder =>
+            {
+                metricsBuilder.AddMeter(InstrumentationOptions.MeterName);
+                metricsBuilder.AddAspNetCoreInstrumentation();
+                metricsBuilder.AddOtlpExporter();
             });
 
         hostApplicationBuilder.Logging.AddOpenTelemetry(options => options.AddOtlpExporter());
