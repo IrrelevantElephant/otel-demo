@@ -24,6 +24,13 @@ services:
       context: ..
       dockerfile: Handler/Dockerfile
     <<: *sharedconfig
+    
+  emailapi:
+    image: ${DOCKER_REGISTRY-}emailapi
+    build:
+      context: ..
+      dockerfile: EmailApi/Dockerfile
+    <<: *sharedconfig
 
   rabbit:
     image: rabbitmq:3-management-alpine

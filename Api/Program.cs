@@ -1,7 +1,6 @@
 using MassTransit;
 using Messages;
 using Shared;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,18 +23,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
 var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
-
-var logger = app.Services.GetService<ILogger<Program>>();
-
-var config = JsonSerializer.Serialize(appSettings);
-
-logger!.LogInformation("This is the config: {config}", config);
 
 app.MapGet("/weatherforecast", () =>
 {

@@ -1,6 +1,7 @@
 ﻿using Handler;
 using MassTransit.Configuration;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Shared;
@@ -8,6 +9,7 @@ using Shared;
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Logging.AddJsonConsole();
+builder.Services.AddHttpClient();
 
 var appSettings = builder.Configuration.Get<AppSettings>();
 

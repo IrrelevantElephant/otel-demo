@@ -56,6 +56,7 @@ public static class IServiceCollectionExtensions
             {
                 additionalTraceConfiguration(tracerBuilder);
                 tracerBuilder.AddAspNetCoreInstrumentation();
+                tracerBuilder.AddHttpClientInstrumentation();
                 tracerBuilder.AddSource(DiagnosticHeaders.DefaultListenerName);
                 tracerBuilder.AddOtlpExporter();
             })
@@ -63,6 +64,7 @@ public static class IServiceCollectionExtensions
             {
                 metricsBuilder.AddMeter(InstrumentationOptions.MeterName);
                 metricsBuilder.AddAspNetCoreInstrumentation();
+                metricsBuilder.AddHttpClientInstrumentation();
                 metricsBuilder.AddOtlpExporter();
             });
 
