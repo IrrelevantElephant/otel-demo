@@ -1,6 +1,8 @@
-﻿using MassTransit;
+﻿using Database;
+using MassTransit;
 using MassTransit.Logging;
 using MassTransit.Monitoring;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -10,6 +12,7 @@ using OpenTelemetry.ResourceDetectors.Container;
 using OpenTelemetry.ResourceDetectors.Host;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using StackExchange.Redis;
 
 namespace Shared;
 
@@ -42,6 +45,18 @@ public static class IServiceCollectionExtensions
         return services;
     }
 
+    public static IServiceCollection ConfigureRedis(this IServiceCollection services, AppSettings settings)
+    {
+        services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(settings.RedisConnectionString));
+        return services;
+    }
+
+    public static IServiceCollection ConfigureDatabase(this IServiceCollection services, AppSettings settings)
+    {
+        services.AddDbContext<GreetingContext>(options => options.UseNpgsql(settings.DatabaseConnectionString));
+        return services;
+    }
+
     public static IHostApplicationBuilder ConfigureOpenTelemetry(this IHostApplicationBuilder hostApplicationBuilder, string serviceName, string serviceVersion, Action<TracerProviderBuilder> additionalTraceConfiguration)
     {
         Action<ResourceBuilder> appResourceBuilder =
@@ -56,6 +71,8 @@ public static class IServiceCollectionExtensions
             {
                 additionalTraceConfiguration(tracerBuilder);
                 tracerBuilder.AddAspNetCoreInstrumentation();
+                tracerBuilder.AddEntityFrameworkCoreInstrumentation();
+                tracerBuilder.AddRedisInstrumentation();
                 tracerBuilder.AddSource(DiagnosticHeaders.DefaultListenerName);
                 tracerBuilder.AddOtlpExporter();
             })

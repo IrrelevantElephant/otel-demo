@@ -1,3 +1,5 @@
 ﻿namespace Messages;
 
-public record HelloMessage(string Hello);
+public record GreetingCreated(Guid GreetingId);
+public record GreetingNotFound(Guid GreetingId);
+public record GreetingMalformed(Guid GreetingId, string greetingBody);

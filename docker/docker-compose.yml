@@ -4,11 +4,15 @@ x-sharedconfig: &sharedconfig
       condition: service_healthy
     grafana:
       condition: service_healthy
+    redis:
+      condition: service_healthy
   environment:
     - MassTransitConfig__Username=guest
     - MassTransitConfig__Password=guest
     - MassTransitConfig__Uri=rabbit
     - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4317
+    - RedisConnectionString=redis
+    - DatabaseConnectionString=Host=postgres;Database=postgres;Username=postgres;Password=password
 
 services:
   api:
@@ -32,6 +36,29 @@ services:
       - "15672:15672"
     healthcheck:
       test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 30s
+      retries: 5
+
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+
+  redis:
+    image: redis
+    ports:
+     - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
       interval: 5s
       timeout: 30s
       retries: 5

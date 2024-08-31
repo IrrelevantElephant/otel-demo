@@ -1,6 +1,11 @@
+using Database;
+using Domain;
 using MassTransit;
 using Messages;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Shared;
+using StackExchange.Redis;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +21,9 @@ builder.ConfigureOpenTelemetry("api", "1.0");
 
 builder.Services.ConfigureMassTransit(appSettings!.MassTransitConfig);
 
+builder.Services.ConfigureRedis(appSettings);
+builder.Services.ConfigureDatabase(appSettings);
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -26,42 +34,42 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
+app.MapPost("/greetings", async ([FromServices]IBus bus, [FromServices]IConnectionMultiplexer muxer, CancellationToken cancellationToken, [FromBody]CreateGreetingRequest request) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    var greeting = new Greeting(Guid.NewGuid(), request.Subject, request.Message);
 
-var logger = app.Services.GetService<ILogger<Program>>();
+    var redis = muxer.GetDatabase();
 
-var config = JsonSerializer.Serialize(appSettings);
+    var json = JsonSerializer.Serialize(greeting);
 
-logger!.LogInformation("This is the config: {config}", config);
+    await redis.StringSetAsync(greeting.Id.ToString(), json);
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+    var message = new GreetingCreated(greeting.Id);
 
-app.MapPost("/publish", async (IBus bus, CancellationToken cancellationToken) =>
-{
-    var message = new HelloMessage("world");
     await bus.Publish(message, cancellationToken);
     return Results.Created();
+})
+.WithName("CreateGreeting")
+.WithOpenApi();
+
+app.MapPost("/greetings/migrate", async ([FromServices] GreetingContext context) =>
+{
+    await context.Database.MigrateAsync();
+    return Results.Ok();
+});
+
+app.MapGet("/greetings/{id}", async ([FromServices]GreetingContext context, Guid id) =>
+{
+    var greeting = await context.Greetings.FirstOrDefaultAsync(x => x.Id == id);
+
+    if (greeting == null)
+    {
+        return Results.NotFound();
+    }
+
+    return Results.Ok(greeting);
 });
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+record CreateGreetingRequest(string Subject, string Message);

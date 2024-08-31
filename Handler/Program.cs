@@ -15,8 +15,12 @@ builder.ConfigureOpenTelemetry("handler", "1.0");
 
 builder.Services.ConfigureMassTransit(appSettings!.MassTransitConfig, (busRegistrationConfigurator) =>
 {
-    busRegistrationConfigurator.RegisterConsumer<HelloMessageConsumer>();
+    busRegistrationConfigurator.RegisterConsumer<GreetingCreatedConsumer>();
 });
+
+builder.Services.ConfigureRedis(appSettings);
+
+builder.Services.ConfigureDatabase(appSettings);
 
 var host = builder.Build();
 
