@@ -2,8 +2,6 @@ x-sharedconfig: &sharedconfig
   depends_on:
     rabbit:
       condition: service_healthy
-    grafana:
-      condition: service_healthy
   environment:
     - MassTransitConfig__Username=guest
     - MassTransitConfig__Password=guest
@@ -55,48 +53,8 @@ services:
       - "9000:9000"
       - "8888:8888"
 
-  tempo:
-    image: grafana/tempo:latest
+  aspiredashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:8.2
     ports:
-      - "3200:3200"
-    volumes:
-      - ../tempo/tempo.yaml:/etc/tempo.yaml
-    command: [ "-config.file=/etc/tempo.yaml" ]
-
-  loki:
-    image: grafana/loki:3.0.0
-    ports:
-      - "3100:3100"
-    command: -config.file=/etc/loki/local-config.yaml
-
-  prometheus:
-    image: prom/prometheus
-    volumes:
-     - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-     - "9090:9090"
-
-  grafana:
-    image: grafana/grafana:latest
-    environment:
-      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-    volumes:
-      - ../grafana/:/etc/grafana/provisioning
-      - ../grafana/grafana.ini:/etc/grafana/grafana.ini
-    ports:
-      - "3000:3000"
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f localhost:3000/api/health && echo 'ready'"]
-      interval: 10s
-      retries: 30
-    depends_on:
-      tempo:
-        condition: service_started
-      loki:
-        condition: service_started
-      prometheus:
-        condition: service_started
-      otelcol:
-        condition: service_started
+      - "18888:18888"
+      - "18889:18889"

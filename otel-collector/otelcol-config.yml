@@ -11,13 +11,9 @@ receivers:
 exporters:
   debug:
   otlp:
-    endpoint: tempo:4317
+    endpoint: aspiredashboard:18889
     tls:
-      insecure: true  
-  loki:
-    endpoint: http://loki:3100/loki/api/v1/push
-  prometheus:
-    endpoint: "0.0.0.0:9000"
+      insecure: true
 
 processors:
   batch:
@@ -31,8 +27,8 @@ service:
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug, loki]
+      exporters: [debug, otlp]
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug, prometheus]
+      exporters: [debug, otlp]
