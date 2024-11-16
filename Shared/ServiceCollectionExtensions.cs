@@ -13,7 +13,7 @@ using OpenTelemetry.Trace;
 
 namespace Shared;
 
-public static class IServiceCollectionExtensions
+public static class ServiceCollectionExtensions
 {
     public static IServiceCollection ConfigureMassTransit(this IServiceCollection services, MassTransitConfig massTransitConfig, Action<IBusRegistrationConfigurator> additionalConfiguration)
     {
