@@ -43,10 +43,16 @@ app.MapGet("/weatherforecast", () =>
 .WithName("GetWeatherForecast")
 .WithOpenApi();
 
-app.MapPost("/publish", async (IBus bus, CancellationToken cancellationToken) =>
+app.MapPost("/publish", async (IBus bus, CancellationToken cancellationToken, int count = 1) =>
 {
-    var message = new HelloMessage("world");
-    await bus.Publish(message, cancellationToken);
+    var tasks = Enumerable.Range(1, count).Select(_ =>
+    {
+        var message = new HelloMessage("world");
+        return bus.Publish(message, cancellationToken);
+    });
+
+    await Task.WhenAll(tasks);
+
     return Results.Created();
 });
 

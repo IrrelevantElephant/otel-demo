@@ -1,5 +1,4 @@
 ﻿using Handler;
-using MassTransit.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -17,7 +16,7 @@ builder.ConfigureOpenTelemetry("handler", "1.0");
 
 builder.Services.ConfigureMassTransit(appSettings!.MassTransitConfig, (busRegistrationConfigurator) =>
 {
-    busRegistrationConfigurator.RegisterConsumer<HelloMessageConsumer>();
+    busRegistrationConfigurator.AddConsumer<HelloMessageConsumer>();
 });
 
 var host = builder.Build();
