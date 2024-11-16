@@ -10,7 +10,8 @@ WORKDIR /src
 COPY ["Api/Api.csproj", "Api/"]
 COPY ["Messages/Messages.csproj", "Messages/"]
 COPY ["Shared/Shared.csproj", "Shared/"]
-COPY Directory.Packages.props .
+COPY Directory.*.props .
+#COPY Directory.Build.props .
 RUN dotnet restore "./Api/Api.csproj"
 COPY . .
 WORKDIR "/src/Api"

@@ -9,7 +9,7 @@ COPY ["Directory.Packages.props", "."]
 COPY ["Handler/Handler.csproj", "Handler/"]
 COPY ["Shared/Shared.csproj", "Shared/"]
 COPY ["Messages/Messages.csproj", "Messages/"]
-COPY Directory.Packages.props .
+COPY Directory.*.props .
 RUN dotnet restore "./Handler/Handler.csproj"
 COPY . .
 WORKDIR "/src/Handler"

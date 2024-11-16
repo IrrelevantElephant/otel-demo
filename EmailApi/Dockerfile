@@ -10,7 +10,7 @@ WORKDIR /src
 COPY ["EmailApi/EmailApi.csproj", "EmailApi/"]
 COPY ["Messages/Messages.csproj", "Messages/"]
 COPY ["Shared/Shared.csproj", "Shared/"]
-COPY Directory.Packages.props .
+COPY Directory.*.props .
 RUN dotnet restore "./EmailApi/EmailApi.csproj"
 COPY . .
 WORKDIR "/src/EmailApi"
